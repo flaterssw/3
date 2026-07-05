@@ -1,0 +1,124 @@
+-- Adopt Me Trading Control (по видео 1 + видео 2)
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+
+local player = Players.LocalPlayer
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "TradingControl"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = player:WaitForChild("PlayerGui")
+
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0, 300, 0, 680)
+mainFrame.Position = UDim2.new(0.5, -150, 0.5, -340)
+mainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+mainFrame.Parent = screenGui
+
+local stroke = Instance.new("UIStroke")
+stroke.Color = Color3.fromRGB(255, 165, 0)
+stroke.Thickness = 3.5
+stroke.Parent = mainFrame
+
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 18)
+corner.Parent = mainFrame
+
+-- Заголовок
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1,0,0,50)
+title.BackgroundColor3 = Color3.fromRGB(25,25,30)
+title.Text = "Trading Control"
+title.TextColor3 = Color3.fromRGB(255, 215, 0)
+title.TextScaled = true
+title.Font = Enum.Font.GothamBold
+title.Parent = mainFrame
+
+-- Player Select
+local nameBox = Instance.new("TextBox")
+nameBox.PlaceholderText = "Ник игрока для трейда..."
+nameBox.Size = UDim2.new(0.75,0,0,45)
+nameBox.Position = UDim2.new(0.025,0,0,70)
+nameBox.BackgroundColor3 = Color3.fromRGB(30,30,35)
+nameBox.TextColor3 = Color3.new(1,1,1)
+nameBox.Parent = mainFrame
+
+local selectBtn = Instance.new("TextButton")
+selectBtn.Text = "▼"
+selectBtn.Size = UDim2.new(0.2,0,0,45)
+selectBtn.Position = UDim2.new(0.78,0,0,70)
+selectBtn.BackgroundColor3 = Color3.fromRGB(255, 140, 0)
+selectBtn.Parent = mainFrame
+
+-- Кнопка Trade
+local startTrade = Instance.new("TextButton")
+startTrade.Text = "START TRADE"
+startTrade.Size = UDim2.new(0.95,0,0,55)
+startTrade.Position = UDim2.new(0.025,0,0,130)
+startTrade.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
+startTrade.TextColor3 = Color3.new(1,1,1)
+startTrade.TextScaled = true
+startTrade.Parent = mainFrame
+
+-- Легендарные петы
+local pets = {"Giraffe", "Frost Dragon", "Shadow Dragon", "Bat Dragon", "Crow", "Parrot", "Owl", "T-Rex"}
+
+local y = 200
+for _, pet in ipairs(pets) do
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(0.9,0,0,40)
+    btn.Position = UDim2.new(0.05,0,0,y)
+    btn.Text = "→ " .. pet .. " (FR)"
+    btn.BackgroundColor3 = Color3.fromRGB(60, 60, 100)
+    btn.TextColor3 = Color3.new(1,1,1)
+    btn.Parent = mainFrame
+    y = y + 48
+    
+    btn.MouseButton1Click:Connect(function()
+        print("Добавлено в твой трейд: " .. pet)
+    end)
+end
+
+-- Drag
+local dragging = false
+title.InputBegan:Connect(function(inp)
+    if inp.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        dragStart = inp.Position
+        startPos = mainFrame.Position
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(inp)
+    if dragging and inp.UserInputType == Enum.UserInputType.MouseMovement then
+        local delta = inp.Position - dragStart
+        mainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+end)
+
+-- Функционал
+selectBtn.MouseButton1Click:Connect(function()
+    local list = "Игроки онлайн:\n"
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p ~= player then list = list .. p.Name .. "\n" end
+    end
+    nameBox.Text = list
+end)
+
+startTrade.MouseButton1Click:Connect(function()
+    local target = nameBox.Text
+    if target ~= "" then
+        game.StarterGui:SetCore("SendNotification", {
+            Title = "Trading Control",
+            Text = "Трейд с " .. target .. " начат!\nОжидаем ответ...",
+            Duration = 7
+        })
+        wait(6)
+        game.StarterGui:SetCore("SendNotification", {
+            Title = "Успех!",
+            Text = "Трейд завершён. Петы добавлены визуально.",
+            Duration = 8
+        })
+    end
+end)
+
+print("✅ Trading Control загружен (по обоим видео)")
